@@ -2,6 +2,9 @@ package com.gevents.gerenciador_eventos.dto;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+import com.gevents.gerenciador_eventos.model.Modalidade;
 
 public class ContratoDTO {
     
@@ -9,6 +12,7 @@ public class ContratoDTO {
     private String descricao;
     private LocalDate dataInicio;
     private LocalDate dataFim;
+    private List<Modalidade> modalidades;
 
     public String getNome() {
         return nome;
@@ -34,11 +38,10 @@ public class ContratoDTO {
     public void setDataFim(LocalDate dataFim) {
         this.dataFim = dataFim;
     }
-    @Override
-    public String toString() {
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-        return "Contrato [nome=" + nome + ", descricao=" + descricao + ", dataInicio=" + (dataInicio != null ? dataInicio.format(dateFormatter) : "Não especificada")
-                + ", dataFim=" + (dataFim != null ? dataFim.format(dateFormatter) : "Não especificada") + "]";
+    public List<Modalidade> getModalidades() {
+        return modalidades;
+    }
+    public void setModalidades(List<Modalidade> modalidades) {
+        this.modalidades = modalidades;
     }
 }

@@ -2,11 +2,13 @@ package com.gevents.gerenciador_eventos.model;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class Contrato {
@@ -18,6 +20,9 @@ public class Contrato {
     private String descricao;
     private LocalDate dataInicio;
     private LocalDate dataFim;
+
+    @OneToMany(mappedBy = "contrato") 
+    private List<Modalidade> modalidades;
 
     public Long getId() {
         return id;
@@ -49,11 +54,11 @@ public class Contrato {
     public void setDataFim(LocalDate dataFim) {
         this.dataFim = dataFim;
     }
-    @Override
-    public String toString() {
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-        return "Contrato [id=" + id + ", nome=" + nome + ", descricao=" + descricao + ", dataInicio=" + (dataInicio != null ? dataInicio.format(dateFormatter) : "Não especificada")
-                + ", dataFim=" + (dataFim != null ? dataFim.format(dateFormatter) : "Não especificada") + "]";
+    public List<Modalidade> getModalidades() {
+        return modalidades;
     }
+    public void setModalidades(List<Modalidade> modalidades) {
+        this.modalidades = modalidades;
+    }
+    
 }

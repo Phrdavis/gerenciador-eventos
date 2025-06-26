@@ -28,6 +28,9 @@ public class ContratoService {
         contrat.setDescricao(contrato.getDescricao());
         contrat.setDataInicio(contrato.getDataInicio());
         contrat.setDataFim(contrato.getDataFim());
+        if (contrato.getModalidades() != null) {
+            contrat.setModalidades(contrato.getModalidades());
+        }
 
         Contrato contratoSalvo = contratoRepository.save(contrat);
         return ResponseEntity.status(HttpStatus.CREATED).body(contratoSalvo);
