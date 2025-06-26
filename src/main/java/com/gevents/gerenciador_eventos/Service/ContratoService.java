@@ -5,11 +5,13 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 import com.gevents.gerenciador_eventos.dto.ContratoDTO;
 import com.gevents.gerenciador_eventos.model.Contrato;
 import com.gevents.gerenciador_eventos.repository.ContratoRepository;
 
+@Service
 public class ContratoService {
 
     private ContratoRepository contratoRepository;
