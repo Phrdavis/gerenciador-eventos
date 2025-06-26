@@ -32,13 +32,13 @@ public class EventoService {
 
         Evento event = new Evento();
 
+        event.setNumSolicitacao(evento.getNumSolicitacao());
         event.setNome(evento.getNome());
         event.setModelo(evento.getModelo());
         event.setUpload(evento.getUpload());
         event.setDestino(evento.getDestino());
         event.setDescricao(evento.getDescricao());
         event.setPdf(evento.getPdf());
-        event.setNumSolicitacao(evento.getNumSolicitacao());
         event.setData(evento.getData());
         event.setInicio(evento.getInicio());
         event.setFim(evento.getFim());
@@ -131,7 +131,7 @@ public class EventoService {
     public ResponseEntity<?> criarMultiplos(List<EventoDTO> eventos) {
         if (eventos == null || eventos.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(java.util.Collections.singletonMap("erro", "Lista de usuários vazia"));
+                    .body(java.util.Collections.singletonMap("erro", "Lista de eventos vazia"));
         }
         List<Evento> novosEventos = new java.util.ArrayList<>();
         for (EventoDTO dto : eventos) {
