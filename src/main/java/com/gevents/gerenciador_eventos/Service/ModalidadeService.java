@@ -95,4 +95,8 @@ public class ModalidadeService {
         return ResponseEntity.status(HttpStatus.CREATED).body(salvos);
     }
 
+    public List<Modalidade> getModalidadesByContratoId(Long contratoId) {
+        return modalidadeRepository.findByContratoId(contratoId);
+    }
+
 }

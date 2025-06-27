@@ -9,15 +9,19 @@ import org.springframework.stereotype.Service;
 
 import com.gevents.gerenciador_eventos.dto.ContratoDTO;
 import com.gevents.gerenciador_eventos.model.Contrato;
+import com.gevents.gerenciador_eventos.model.Modalidade;
 import com.gevents.gerenciador_eventos.repository.ContratoRepository;
+import com.gevents.gerenciador_eventos.repository.ModalidadeRepository;
 
 @Service
 public class ContratoService {
 
     private ContratoRepository contratoRepository;
+    private ModalidadeRepository modalidadeRepository;
 
-    public ContratoService(ContratoRepository contratoRepository){
+    public ContratoService(ContratoRepository contratoRepository, ModalidadeRepository modalidadeRepository){
         this.contratoRepository = contratoRepository;
+        this.modalidadeRepository = modalidadeRepository;
     }
 
 
@@ -28,11 +32,20 @@ public class ContratoService {
         contrat.setDescricao(contrato.getDescricao());
         contrat.setDataInicio(contrato.getDataInicio());
         contrat.setDataFim(contrato.getDataFim());
-        if (contrato.getModalidades() != null) {
-            contrat.setModalidades(contrato.getModalidades());
-        }
 
         Contrato contratoSalvo = contratoRepository.save(contrat);
+
+        if (contrato.getModalidades() != null) {
+            List<Modalidade> modalidades = new ArrayList<>();
+            for(Modalidade modalidade: contrato.getModalidades()) {
+                modalidade.setContrato(contratoSalvo);
+                modalidade.setNome(modalidade.getNome());
+                modalidade.setValor(modalidade.getValor());
+                modalidadeRepository.save(modalidade);
+                modalidades.add(modalidade);
+            }
+            contratoSalvo.setModalidades(modalidades);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(contratoSalvo);
     }
     public ResponseEntity<?> buscarPorId(Long id) {

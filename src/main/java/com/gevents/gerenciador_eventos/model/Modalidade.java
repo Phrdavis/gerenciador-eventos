@@ -1,5 +1,7 @@
 package com.gevents.gerenciador_eventos.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,6 +21,7 @@ public class Modalidade {
 
     @ManyToOne
     @JoinColumn(name = "contrato_id", nullable = false)
+    @JsonBackReference
     private Contrato contrato;
 
     public Long getId() {

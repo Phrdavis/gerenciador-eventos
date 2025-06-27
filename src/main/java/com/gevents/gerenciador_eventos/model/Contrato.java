@@ -4,7 +4,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,7 +25,8 @@ public class Contrato {
     private LocalDate dataInicio;
     private LocalDate dataFim;
 
-    @OneToMany(mappedBy = "contrato") 
+    @OneToMany(mappedBy = "contrato", fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<Modalidade> modalidades;
 
     public Long getId() {

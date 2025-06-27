@@ -55,5 +55,10 @@ public class ModalidadeController {
     public ResponseEntity<?> criarMultiplos(@RequestBody List<ModalidadeDTO> modalidadeDTOs) {
         return modalidadeService.criarMultiplos(modalidadeDTOs);
     }
+    
+    @GetMapping("/contrato/{contratoId}")
+    public List<Modalidade> getModalidadesByContratoId(@PathVariable Long contratoId) {
+        return modalidadeService.getModalidadesByContratoId(contratoId);
+    }
 
 }
