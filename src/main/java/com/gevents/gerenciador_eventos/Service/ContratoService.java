@@ -2,6 +2,8 @@ package com.gevents.gerenciador_eventos.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,15 +38,12 @@ public class ContratoService {
         Contrato contratoSalvo = contratoRepository.save(contrat);
 
         if (contrato.getModalidades() != null) {
-            List<Modalidade> modalidades = new ArrayList<>();
             for(Modalidade modalidade: contrato.getModalidades()) {
                 modalidade.setContrato(contratoSalvo);
                 modalidade.setNome(modalidade.getNome());
                 modalidade.setValor(modalidade.getValor());
                 modalidadeRepository.save(modalidade);
-                modalidades.add(modalidade);
             }
-            contratoSalvo.setModalidades(modalidades);
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(contratoSalvo);
     }
@@ -76,6 +75,31 @@ public class ContratoService {
             contrato.setDataFim(contratoDTO.getDataFim());
         }
         Contrato contratoAtualizado = contratoRepository.save(contrato);
+
+        if (contratoDTO.getModalidades() != null) {
+             List<Modalidade> modalidadesExistentes = contratoAtualizado.getModalidades();
+
+            Set<Long> idsModalidadesDTO = contratoDTO.getModalidades().stream()
+                .map(Modalidade::getId)
+                .collect(Collectors.toSet());
+
+            for (Modalidade modalidade : modalidadesExistentes) {
+                if (!idsModalidadesDTO.contains(modalidade.getId())) {
+                    modalidadeRepository.delete(modalidade);
+                }
+            }
+            
+            for(Modalidade modalidade: contratoDTO.getModalidades()) {
+                if(modalidade.getId() == null){
+
+                    modalidade.setContrato(contratoAtualizado);
+                    modalidade.setNome(modalidade.getNome());
+                    modalidade.setValor(modalidade.getValor());
+                    modalidadeRepository.save(modalidade);
+                }
+            }
+        }
+
         return ResponseEntity.ok(contratoAtualizado);
     }
     public ResponseEntity<?> deletar(Long id) {
