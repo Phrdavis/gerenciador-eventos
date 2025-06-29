@@ -2,10 +2,11 @@ package com.gevents.gerenciador_eventos.model;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 
@@ -30,6 +31,18 @@ public class Evento {
     private String local;
     private String responsavel;
     private String telefoneResponsavel;
+
+    @ManyToOne
+    @JoinColumn(name = "status_id", nullable = true)
+    private Status status;
+
+    @ManyToOne
+    @JoinColumn(name = "contrato_id", nullable = true)
+    private Contrato contrato;
+
+    @ManyToOne
+    @JoinColumn(name = "modalidade_id", nullable = true)
+    private Contrato modalidade;
     
     public Long getId(){
         return id;
@@ -128,26 +141,28 @@ public class Evento {
         this.horaFim = horaFim;
     }
 
-    @Override
-    public String toString() {
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-
-        return "Nome: " + nome + "\n" +
-               "Modelo: " + modelo + "\n" +
-               "Upload: " + upload + "\n" +
-               "Destino: " + destino + "\n" +
-               "Descricao: " + descricao + "\n" +
-               "Pdf: " + pdf + "\n" +
-               "Número de Solicitação: " + numSolicitacao + "\n" +
-               "Data: " + (data != null ? data.format(dateFormatter) : "Não especificada") + "\n" +
-               "Início: " + (inicio != null ? inicio.format(dateFormatter) : "Não especificado") + "\n" +
-               "Fim: " + (fim != null ? fim.format(dateFormatter) : "Não especificado") + "\n" +
-               "Hora de Início: " + (horaInicio != null ? horaInicio.format(timeFormatter) : "Não especificada") + "\n" +
-               "Hora de Fim: " + (horaFim != null ? horaFim.format(timeFormatter) : "Não especificada") + "\n" +
-               "Local: " + local + "\n" +
-               "Responsável: " + responsavel + "\n" +
-               "Telefone do Responsável: " + telefoneResponsavel;
+    public Status getStatus() {
+        return status;
     }
-    
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public Contrato getContrato() {
+        return contrato;
+    }
+
+    public void setContrato(Contrato contrato) {
+        this.contrato = contrato;
+    }
+
+    public Contrato getModalidade() {
+        return modalidade;
+    }
+
+    public void setModalidade(Contrato modalidade) {
+        this.modalidade = modalidade;
+    }
+
 }

@@ -2,7 +2,9 @@ package com.gevents.gerenciador_eventos.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+
+import com.gevents.gerenciador_eventos.model.Contrato;
+import com.gevents.gerenciador_eventos.model.Status;
 
 public class EventoDTO {
 
@@ -21,7 +23,10 @@ public class EventoDTO {
     private String local;
     private String responsavel;
     private String telefoneResponsavel;
-    
+    private Status status;
+    private Contrato contrato;
+    private Contrato modalidade;
+
     public String getNome(){
         return nome;
     }
@@ -113,26 +118,28 @@ public class EventoDTO {
         this.horaFim = horaFim;
     }
 
-    @Override
-    public String toString() {
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-
-        return "Nome: " + nome + "\n" +
-               "Modelo: " + modelo + "\n" +
-               "Upload: " + upload + "\n" +
-               "Destino: " + destino + "\n" +
-               "Descricao: " + descricao + "\n" +
-               "Pdf: " + pdf + "\n" +
-               "Número de Solicitação: " + numSolicitacao + "\n" +
-               "Data: " + (data != null ? data.format(dateFormatter) : "Não especificada") + "\n" +
-               "Início: " + (inicio != null ? inicio.format(dateFormatter) : "Não especificado") + "\n" +
-               "Fim: " + (fim != null ? fim.format(dateFormatter) : "Não especificado") + "\n" +
-               "Hora de Início: " + (horaInicio != null ? horaInicio.format(timeFormatter) : "Não especificada") + "\n" +
-               "Hora de Fim: " + (horaFim != null ? horaFim.format(timeFormatter) : "Não especificada") + "\n" +
-               "Local: " + local + "\n" +
-               "Responsável: " + responsavel + "\n" +
-               "Telefone do Responsável: " + telefoneResponsavel;
+    public Status getStatus() {
+        return status;
     }
-    
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public Contrato getContrato() {
+        return contrato;
+    }
+
+    public void setContrato(Contrato contrato) {
+        this.contrato = contrato;
+    }
+
+    public Contrato getModalidade() {
+        return modalidade;
+    }
+
+    public void setModalidade(Contrato modalidade) {
+        this.modalidade = modalidade;
+    }
+
 }

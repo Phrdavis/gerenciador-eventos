@@ -15,16 +15,25 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.gevents.gerenciador_eventos.dto.EventoDTO;
 import com.gevents.gerenciador_eventos.model.Evento;
+import com.gevents.gerenciador_eventos.repository.ContratoRepository;
 import com.gevents.gerenciador_eventos.repository.EventoRepository;
+import com.gevents.gerenciador_eventos.repository.ModalidadeRepository;
+import com.gevents.gerenciador_eventos.repository.StatusRepository;
 import com.gevents.gerenciador_eventos.util.ExtrairDados;
 
 @Service
 public class EventoService {
 
     private EventoRepository eventoRepository;
+    private StatusRepository statusRepository;
+    private ContratoRepository contratoRepository;
+    private ModalidadeRepository modalidadeRepository;
 
-    public EventoService(EventoRepository eventoRepository){
+    public EventoService(EventoRepository eventoRepository, StatusRepository statusRepository, ContratoRepository contratoRepository, ModalidadeRepository modalidadeRepository){
         this.eventoRepository = eventoRepository;
+        this.statusRepository = statusRepository;
+        this.contratoRepository = contratoRepository;
+        this.modalidadeRepository = modalidadeRepository;
     }
     
 
@@ -47,6 +56,22 @@ public class EventoService {
         event.setLocal(evento.getLocal());
         event.setResponsavel(evento.getResponsavel());
         event.setTelefoneResponsavel(evento.getTelefoneResponsavel());
+        if(!statusRepository.findById(evento.getStatus().getId()).isPresent()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Collections.singletonMap("erro", "Status não encontrado"));
+        }
+        event.setStatus(evento.getStatus());
+
+        if(!contratoRepository.findById(evento.getContrato().getId()).isPresent()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Collections.singletonMap("erro", "Contrato não encontrado"));
+        }
+
+        event.setContrato(evento.getContrato());
+
+        if(!modalidadeRepository.findById(evento.getModalidade().getId()).isPresent()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Collections.singletonMap("erro", "Modalidade não encontrada"));
+        }
+        event.setModalidade(evento.getModalidade());
+
         Evento savedUser = eventoRepository.save(event);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
@@ -115,6 +140,27 @@ public class EventoService {
         if (eventoDTO.getTelefoneResponsavel() != null) {
             evento.setTelefoneResponsavel(eventoDTO.getTelefoneResponsavel());
         }
+        if (eventoDTO.getStatus() != null) {
+            if (!statusRepository.findById(eventoDTO.getStatus().getId()).isPresent()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(java.util.Collections.singletonMap("erro", "Status não encontrado"));
+            }
+            evento.setStatus(eventoDTO.getStatus());
+        }
+        if (eventoDTO.getContrato() != null) {
+            if (!contratoRepository.findById(eventoDTO.getContrato().getId()).isPresent()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(java.util.Collections.singletonMap("erro", "Contrato não encontrado"));
+            }
+            evento.setContrato(eventoDTO.getContrato());
+        }
+        if (eventoDTO.getModalidade() != null) {
+            if (!modalidadeRepository.findById(eventoDTO.getModalidade().getId()).isPresent()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(java.util.Collections.singletonMap("erro", "Modalidade não encontrada"));
+            }
+            evento.setModalidade(eventoDTO.getModalidade());
+        }
         Evento eventoAtualizado = eventoRepository.save(evento);
         return ResponseEntity.ok(eventoAtualizado);
     }
@@ -151,6 +197,27 @@ public class EventoService {
             event.setLocal(dto.getLocal());
             event.setResponsavel(dto.getResponsavel());
             event.setTelefoneResponsavel(dto.getTelefoneResponsavel());
+            if (dto.getStatus() != null) {
+                if (!statusRepository.findById(dto.getStatus().getId()).isPresent()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(java.util.Collections.singletonMap("erro", "Status não encontrado"));
+                }
+                event.setStatus(dto.getStatus());
+            }
+            if (dto.getContrato() != null) {
+                if (!contratoRepository.findById(dto.getContrato().getId()).isPresent()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(java.util.Collections.singletonMap("erro", "Contrato não encontrado"));
+                }
+                event.setContrato(dto.getContrato());
+            }
+            if (dto.getModalidade() != null) {
+                if (!modalidadeRepository.findById(dto.getModalidade().getId()).isPresent()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(java.util.Collections.singletonMap("erro", "Modalidade não encontrada"));
+                }
+                event.setModalidade(dto.getModalidade());
+            }
             novosEventos.add(event);
         }
         List<Evento> salvos = eventoRepository.saveAll(novosEventos);

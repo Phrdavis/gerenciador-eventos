@@ -14,7 +14,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class ExtrairDados {
-    public static void main(String[] args) {}
 
     // Método para buscar correspondência usando regex
     public static String getRegexMatch(String input, String pattern, int groupIndex) {
