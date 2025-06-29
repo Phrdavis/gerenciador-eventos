@@ -138,7 +138,7 @@ public class ExecucaoService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Collections.singletonMap("erro", "Execucao não encontrado"));
         }
         execucaoRepository.deleteById(id);
-        return ResponseEntity.ok("Execucao deletado com sucesso");
+        return ResponseEntity.ok(java.util.Collections.singletonMap("message", "Execucao deletado com sucesso"));
     }
     public ResponseEntity<?> criarMultiplos(List<ExecucaoDTO> execucoes) {
         if (execucoes == null || execucoes.isEmpty()) {

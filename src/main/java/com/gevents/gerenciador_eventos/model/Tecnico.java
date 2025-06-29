@@ -1,5 +1,6 @@
 package com.gevents.gerenciador_eventos.model;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -19,7 +20,7 @@ public class Tecnico {
     private String nome;
     private String telefone;
     private String email;
-    private Long diaria;
+    private BigDecimal diaria;
     
     @ManyToMany(mappedBy = "tecnicos")
     @JsonBackReference
@@ -49,10 +50,10 @@ public class Tecnico {
     public void setEmail(String email) {
         this.email = email;
     }
-    public Long getDiaria() {
+    public BigDecimal getDiaria() {
         return diaria;
     }
-    public void setDiaria(Long diaria) {
+    public void setDiaria(BigDecimal diaria) {
         this.diaria = diaria;
     }
 

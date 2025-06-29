@@ -1,12 +1,14 @@
 package com.gevents.gerenciador_eventos.dto;
 
+import java.math.BigDecimal;
+
 public class TecnicoDTO {
     
     private Long id;
     private String nome;
     private String telefone;
     private String email;
-    private Long diaria;
+    private BigDecimal diaria;
 
     public Long getId() {
         return id;
@@ -32,10 +34,10 @@ public class TecnicoDTO {
     public void setEmail(String email) {
         this.email = email;
     }
-    public Long getDiaria() {
+    public BigDecimal getDiaria() {
         return diaria;
     }
-    public void setDiaria(Long diaria) {
+    public void setDiaria(BigDecimal diaria) {
         this.diaria = diaria;
     }
 
