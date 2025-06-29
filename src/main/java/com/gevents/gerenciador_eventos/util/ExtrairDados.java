@@ -170,7 +170,6 @@ public class ExtrairDados {
         return evento;
 
     }
-
     
     public static String extrairTextoDePDF(String caminhoPDF) throws IOException {
 
