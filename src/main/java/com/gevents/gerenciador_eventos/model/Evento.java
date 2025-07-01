@@ -33,7 +33,7 @@ public class Evento {
     private String telefoneResponsavel;
 
     @ManyToOne
-    @JoinColumn(name = "status_id", nullable = true)
+    @JoinColumn(name = "status_id", nullable = false)
     private Status status;
 
     @ManyToOne

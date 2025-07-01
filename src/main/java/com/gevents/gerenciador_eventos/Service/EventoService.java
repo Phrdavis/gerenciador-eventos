@@ -56,21 +56,27 @@ public class EventoService {
         event.setLocal(evento.getLocal());
         event.setResponsavel(evento.getResponsavel());
         event.setTelefoneResponsavel(evento.getTelefoneResponsavel());
-        if(!statusRepository.findById(evento.getStatus().getId()).isPresent()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Collections.singletonMap("erro", "Status não encontrado"));
-        }
-        event.setStatus(evento.getStatus());
-
-        if(!contratoRepository.findById(evento.getContrato().getId()).isPresent()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Collections.singletonMap("erro", "Contrato não encontrado"));
+        if(evento.getStatus() != null) {
+            if(!statusRepository.findById(evento.getStatus().getId()).isPresent()){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Collections.singletonMap("erro", "Status não encontrado"));
+            }
+            event.setStatus(evento.getStatus());
         }
 
-        event.setContrato(evento.getContrato());
-
-        if(!modalidadeRepository.findById(evento.getModalidade().getId()).isPresent()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Collections.singletonMap("erro", "Modalidade não encontrada"));
+        if(evento.getContrato() != null) {
+            if(!contratoRepository.findById(evento.getContrato().getId()).isPresent()){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Collections.singletonMap("erro", "Contrato não encontrado"));
+            }
+            event.setContrato(evento.getContrato());
         }
-        event.setModalidade(evento.getModalidade());
+
+        if(evento.getModalidade() != null){
+
+            if(!modalidadeRepository.findById(evento.getModalidade().getId()).isPresent()){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Collections.singletonMap("erro", "Modalidade não encontrada"));
+            }
+            event.setModalidade(evento.getModalidade());
+        }
 
         Evento savedUser = eventoRepository.save(event);
 
@@ -299,6 +305,7 @@ public class EventoService {
         }
 
         dadosExtraidos.setPdf(destino);
+        dadosExtraidos.setStatus(statusRepository.findByDescricao("Em Revisão"));
 
         return dadosExtraidos;
     }
