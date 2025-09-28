@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import com.gevents.gerenciador_eventos.model.Contrato;
+import com.gevents.gerenciador_eventos.model.Modalidade;
 import com.gevents.gerenciador_eventos.model.Status;
 
 public class EventoDTO {
@@ -25,7 +26,7 @@ public class EventoDTO {
     private String telefoneResponsavel;
     private Status status;
     private Contrato contrato;
-    private Contrato modalidade;
+    private Modalidade modalidade;
 
     public String getNome(){
         return nome;
@@ -134,11 +135,11 @@ public class EventoDTO {
         this.contrato = contrato;
     }
 
-    public Contrato getModalidade() {
+    public Modalidade getModalidade() {
         return modalidade;
     }
 
-    public void setModalidade(Contrato modalidade) {
+    public void setModalidade(Modalidade modalidade) {
         this.modalidade = modalidade;
     }
 

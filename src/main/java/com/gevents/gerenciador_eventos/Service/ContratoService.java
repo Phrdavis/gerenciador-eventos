@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gevents.gerenciador_eventos.dto.ContratoDTO;
 import com.gevents.gerenciador_eventos.model.Contrato;
@@ -90,25 +91,27 @@ public class ContratoService {
             }
             
             for(Modalidade modalidade: contratoDTO.getModalidades()) {
-                if(modalidade.getId() == null){
-
-                    modalidade.setContrato(contratoAtualizado);
-                    modalidade.setNome(modalidade.getNome());
-                    modalidade.setValor(modalidade.getValor());
-                    modalidadeRepository.save(modalidade);
-                }
+                modalidade.setContrato(contratoAtualizado);
+                modalidadeRepository.save(modalidade);
             }
         }
 
         return ResponseEntity.ok(contratoAtualizado);
     }
-    public ResponseEntity<?> deletar(Long id) {
-        if (!contratoRepository.existsById(id)){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Collections.singletonMap("erro", "Contrato não encontrado"));
-        }
-        contratoRepository.deleteById(id);
-        return ResponseEntity.ok("Contrato deletado com sucesso");
+    
+    @Transactional
+   public ResponseEntity<?> deletar(Long id) {
+        return contratoRepository.findById(id)
+            .map(contrato -> {
+                if (contrato.getModalidades() != null && !contrato.getModalidades().isEmpty()) {
+                    modalidadeRepository.deleteAll(contrato.getModalidades());
+                }
+                contratoRepository.delete(contrato);
+                return ResponseEntity.noContent().build(); // 204 No Content
+            })
+            .orElse(ResponseEntity.notFound().build());
     }
+
     public ResponseEntity<?> criarMultiplos(List<ContratoDTO> contratos) {
         if (contratos == null || contratos.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

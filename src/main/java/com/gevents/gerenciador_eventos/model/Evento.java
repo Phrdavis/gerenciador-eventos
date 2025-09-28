@@ -33,7 +33,7 @@ public class Evento {
     private String telefoneResponsavel;
 
     @ManyToOne
-    @JoinColumn(name = "status_id", nullable = false)
+    @JoinColumn(name = "status_id", nullable = true)
     private Status status;
 
     @ManyToOne
@@ -42,7 +42,7 @@ public class Evento {
 
     @ManyToOne
     @JoinColumn(name = "modalidade_id", nullable = true)
-    private Contrato modalidade;
+    private Modalidade modalidade;
     
     public Long getId(){
         return id;
@@ -157,11 +157,11 @@ public class Evento {
         this.contrato = contrato;
     }
 
-    public Contrato getModalidade() {
+    public Modalidade getModalidade() {
         return modalidade;
     }
 
-    public void setModalidade(Contrato modalidade) {
+    public void setModalidade(Modalidade modalidade) {
         this.modalidade = modalidade;
     }
 
