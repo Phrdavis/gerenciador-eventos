@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.gevents.gerenciador_eventos.dto.EventoDTO;
+import com.gevents.gerenciador_eventos.model.Contrato;
 import com.gevents.gerenciador_eventos.model.Evento;
+import com.gevents.gerenciador_eventos.model.Modalidade;
 import com.gevents.gerenciador_eventos.repository.ContratoRepository;
 import com.gevents.gerenciador_eventos.repository.EventoRepository;
 import com.gevents.gerenciador_eventos.repository.ModalidadeRepository;
@@ -177,7 +179,7 @@ public class EventoService {
                     .body(java.util.Collections.singletonMap("erro", "Evento não encontrado"));
         }
         eventoRepository.deleteById(id);
-        return ResponseEntity.ok("Evento deletado com sucesso");
+        return ResponseEntity.status(HttpStatus.OK).body(java.util.Collections.singletonMap("mensagem", "Evento deletado com sucesso"));
     }
 
     public ResponseEntity<?> criarMultiplos(List<EventoDTO> eventos) {
@@ -230,11 +232,21 @@ public class EventoService {
         return ResponseEntity.status(HttpStatus.CREATED).body(salvos);
     }
 
-    public ResponseEntity<?> uploadEventos(@RequestBody List<MultipartFile> arquivos) {
+    public ResponseEntity<?> uploadEventos(Contrato contrato, Modalidade modalidade, List<MultipartFile> arquivos) {
         
         if (arquivos == null || arquivos.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(java.util.Collections.singletonMap("erro", "Por favor, envie um arquivo."));
+        }
+
+        if (contrato == null || contratoRepository.findById(contrato.getId()).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(java.util.Collections.singletonMap("erro", "Por favor, envie um contrato."));
+        }
+
+        if (modalidade == null || modalidadeRepository.findById(modalidade.getId()).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(java.util.Collections.singletonMap("erro", "Por favor, envie uma modalidade."));
         }
 
         String pastaDestino = Paths.get("uploads").toAbsolutePath().toString();
@@ -262,6 +274,9 @@ public class EventoService {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(java.util.Collections.singletonMap("erro", "Arquivo vazio: " + arquivo.getOriginalFilename()));
                 }
+
+                evento.setContrato(contrato);
+                evento.setModalidade(modalidade);
 
                 criar(evento);
 
