@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.gevents.gerenciador_eventos.dto.UserDTO;
+import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.model.User;
 import com.gevents.gerenciador_eventos.repository.UserRepository;
 
@@ -46,7 +47,7 @@ public class UserService {
     }
     
     public List<User> buscarTodos() {
-        return userRepository.findAll();
+        return userRepository.findByDeleted("");
     }
 
     public ResponseEntity<?> atualizar(Long id, UserDTO userDTO) {
@@ -82,11 +83,14 @@ public class UserService {
         return ResponseEntity.ok(menuAtualizado);
     }
     public ResponseEntity<?> deletar(Long id) {
-        if (!userRepository.existsById(id)){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Collections.singletonMap("erro", "User não encontrado"));
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Collections.singletonMap("erro", "Usuario não encontrado"));
         }
-        userRepository.deleteById(id);
-        return ResponseEntity.ok("User deletado com sucesso");
+        user.setDeleted("*"); // Marca como deletado
+        userRepository.save(user);
+        return ResponseEntity.ok(java.util.Collections.singletonMap("mensagem", "Usuario deletado com sucesso"));
+
     }
     public ResponseEntity<?> criarMultiplos(List<UserDTO> users) {
         if (users == null || users.isEmpty()) {

@@ -16,6 +16,7 @@ import com.gevents.gerenciador_eventos.dto.EventoDTO;
 import com.gevents.gerenciador_eventos.model.Contrato;
 import com.gevents.gerenciador_eventos.model.Evento;
 import com.gevents.gerenciador_eventos.model.Modalidade;
+import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.repository.ContratoRepository;
 import com.gevents.gerenciador_eventos.repository.EventoRepository;
 import com.gevents.gerenciador_eventos.repository.ModalidadeRepository;
@@ -93,7 +94,7 @@ public class EventoService {
     }
 
     public List<Evento> buscarTodos() {
-        return eventoRepository.findAll();
+        return eventoRepository.findByDeleted("");
     }
 
     public ResponseEntity<?> atualizar(Long id, EventoDTO eventoDTO) {
@@ -173,12 +174,13 @@ public class EventoService {
     }
 
     public ResponseEntity<?> deletar(Long id) {
-        if (!eventoRepository.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(java.util.Collections.singletonMap("erro", "Evento não encontrado"));
+        Evento evento = eventoRepository.findById(id).orElse(null);
+        if (evento == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Collections.singletonMap("erro", "Evento não encontrado"));
         }
-        eventoRepository.deleteById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(java.util.Collections.singletonMap("mensagem", "Evento deletado com sucesso"));
+        evento.setDeleted("*"); // Marca como deletado
+        eventoRepository.save(evento);
+        return ResponseEntity.ok(java.util.Collections.singletonMap("mensagem", "Evento deletado com sucesso"));
     }
 
     public ResponseEntity<?> criarMultiplos(List<EventoDTO> eventos) {

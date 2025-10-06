@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.gevents.gerenciador_eventos.dto.ContratoDTO;
 import com.gevents.gerenciador_eventos.model.Contrato;
 import com.gevents.gerenciador_eventos.model.Modalidade;
+import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.repository.ContratoRepository;
 import com.gevents.gerenciador_eventos.repository.ModalidadeRepository;
 
@@ -56,7 +57,7 @@ public class ContratoService {
         return ResponseEntity.ok(contrato);
     }
     public List<Contrato> buscarTodos() {
-        return contratoRepository.findAll();
+        return contratoRepository.findByDeleted("");
     }
     public ResponseEntity<?> atualizar(Long id, ContratoDTO contratoDTO) {
         Contrato contrato = contratoRepository.findById(id).orElse(null);
@@ -101,15 +102,13 @@ public class ContratoService {
     
     @Transactional
    public ResponseEntity<?> deletar(Long id) {
-        return contratoRepository.findById(id)
-            .map(contrato -> {
-                if (contrato.getModalidades() != null && !contrato.getModalidades().isEmpty()) {
-                    modalidadeRepository.deleteAll(contrato.getModalidades());
-                }
-                contratoRepository.delete(contrato);
-                return ResponseEntity.noContent().build(); // 204 No Content
-            })
-            .orElse(ResponseEntity.notFound().build());
+        Contrato contrato = contratoRepository.findById(id).orElse(null);
+        if (contrato == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Collections.singletonMap("erro", "Contrato não encontrado"));
+        }
+        contrato.setDeleted("*"); // Marca como deletado
+        contratoRepository.save(contrato);
+        return ResponseEntity.ok(java.util.Collections.singletonMap("mensagem", "Contrato deletado com sucesso"));
     }
 
     public ResponseEntity<?> criarMultiplos(List<ContratoDTO> contratos) {

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.gevents.gerenciador_eventos.dto.TecnicoDTO;
+import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.model.Tecnico;
 import com.gevents.gerenciador_eventos.repository.TecnicoRepository;
 
@@ -40,7 +41,7 @@ public class TecnicoService {
         return ResponseEntity.ok(tecnico);
     }
     public List<Tecnico> buscarTodos() {
-        return tecnicoRepository.findAll();
+        return tecnicoRepository.findByDeleted("");
     }
     public ResponseEntity<?> atualizar(Long id, TecnicoDTO tecnicoDTO) {
         Tecnico tecnico = tecnicoRepository.findById(id).orElse(null);
@@ -64,11 +65,14 @@ public class TecnicoService {
         return ResponseEntity.ok(tecnicoAtualizado);
     }
     public ResponseEntity<?> deletar(Long id) {
-        if (!tecnicoRepository.existsById(id)){
+        Tecnico tecnico = tecnicoRepository.findById(id).orElse(null);
+        if (tecnico == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Collections.singletonMap("erro", "Técnico não encontrado"));
         }
-        tecnicoRepository.deleteById(id);
-        return ResponseEntity.ok("Técnico deletado com sucesso");
+        tecnico.setDeleted("*"); // Marca como deletado
+        tecnicoRepository.save(tecnico);
+        return ResponseEntity.ok(java.util.Collections.singletonMap("mensagem", "Técnico deletado com sucesso"));
+
     }
     public ResponseEntity<?> criarMultiplos(List<TecnicoDTO> tecnicos) {
         if (tecnicos == null || tecnicos.isEmpty()) {

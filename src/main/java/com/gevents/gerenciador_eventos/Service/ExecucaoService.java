@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.gevents.gerenciador_eventos.dto.ExecucaoDTO;
 import com.gevents.gerenciador_eventos.model.Execucao;
+import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.model.Tecnico;
 import com.gevents.gerenciador_eventos.repository.EventoRepository;
 import com.gevents.gerenciador_eventos.repository.ExecucaoRepository;
@@ -68,7 +69,7 @@ public class ExecucaoService {
         return ResponseEntity.ok(execucao);
     }
     public List<Execucao> buscarTodos() {
-        return execucaoRepository.findAll();
+        return execucaoRepository.findByDeleted("");
     }
     public ResponseEntity<?> atualizar(Long id, ExecucaoDTO execucaoDTO) {
         Execucao execucao = execucaoRepository.findById(id).orElse(null);
@@ -134,12 +135,15 @@ public class ExecucaoService {
     }
 
     public ResponseEntity<?> deletar(Long id) {
-        if (!execucaoRepository.existsById(id)){
+        Execucao execucao = execucaoRepository.findById(id).orElse(null);
+        if (execucao == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Collections.singletonMap("erro", "Execucao não encontrado"));
         }
-        execucaoRepository.deleteById(id);
-        return ResponseEntity.ok(java.util.Collections.singletonMap("message", "Execucao deletado com sucesso"));
+        execucao.setDeleted("*"); // Marca como deletado
+        execucaoRepository.save(execucao);
+        return ResponseEntity.ok(java.util.Collections.singletonMap("mensagem", "Execucao deletado com sucesso"));
     }
+
     public ResponseEntity<?> criarMultiplos(List<ExecucaoDTO> execucoes) {
         if (execucoes == null || execucoes.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

@@ -5,16 +5,23 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
-public class Status {
+@Table(
+    name = "status",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"descricao", "D_E_L_E_T_"})
+    }
+)
+public class Status extends BaseEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     
-    @Column(unique = true)
     private String descricao;
 
     public Status() {

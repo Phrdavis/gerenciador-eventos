@@ -37,7 +37,7 @@ public class StatusService {
         return ResponseEntity.ok(status);
     }
     public List<Status> buscarTodos() {
-        return statusRepository.findAll();
+        return statusRepository.findByDeleted("");
     }
     public ResponseEntity<?> atualizar(Long id, StatusDTO statusDTO) {
         Status status = statusRepository.findById(id).orElse(null);
@@ -51,13 +51,18 @@ public class StatusService {
 
         return ResponseEntity.ok(statusAtualizado);
     }
+
     public ResponseEntity<?> deletar(Long id) {
-        if (!statusRepository.existsById(id)){
+        Status status = statusRepository.findById(id).orElse(null);
+        if (status == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Collections.singletonMap("erro", "Status não encontrado"));
         }
-        statusRepository.deleteById(id);
-        return ResponseEntity.ok("Status deletado com sucesso");
+        status.setDeleted("*"); // Marca como deletado
+        statusRepository.save(status);
+        return ResponseEntity.ok(java.util.Collections.singletonMap("mensagem", "Status deletado com sucesso"));
+        
     }
+
     public ResponseEntity<?> criarMultiplos(List<StatusDTO> statuss) {
         if (statuss == null || statuss.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

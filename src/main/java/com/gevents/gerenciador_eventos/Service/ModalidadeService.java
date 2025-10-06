@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.gevents.gerenciador_eventos.dto.ModalidadeDTO;
 import com.gevents.gerenciador_eventos.model.Modalidade;
+import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.repository.ContratoRepository;
 import com.gevents.gerenciador_eventos.repository.ModalidadeRepository;
 
@@ -46,7 +47,7 @@ public class ModalidadeService {
         return ResponseEntity.ok(modalidade);
     }
     public List<Modalidade> buscarTodos() {
-        return modalidadeRepository.findAll();
+        return modalidadeRepository.findByDeleted("");
     }
     public ResponseEntity<?> atualizar(Long id, ModalidadeDTO modalidadeDTO) {
         Modalidade modalidade = modalidadeRepository.findById(id).orElse(null);
@@ -71,11 +72,14 @@ public class ModalidadeService {
         return ResponseEntity.ok(modalidadeAtualizado);
     }
     public ResponseEntity<?> deletar(Long id) {
-        if (!modalidadeRepository.existsById(id)){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Collections.singletonMap("erro", "Modalidade não encontrado"));
+        Modalidade modalidade = modalidadeRepository.findById(id).orElse(null);
+        if (modalidade == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Collections.singletonMap("erro", "Modalidade não encontrada"));
         }
-        modalidadeRepository.deleteById(id);
-        return ResponseEntity.ok("Modalidade deletada com sucesso");
+        modalidade.setDeleted("*"); // Marca como deletado
+        modalidadeRepository.save(modalidade);
+        return ResponseEntity.ok(java.util.Collections.singletonMap("mensagem", "Modalidade deletada com sucesso"));
+
     }
     public ResponseEntity<?> criarMultiplos(List<ModalidadeDTO> modalidades) {
         if (modalidades == null || modalidades.isEmpty()) {

@@ -12,4 +12,6 @@ public interface ModalidadeRepository extends JpaRepository<Modalidade, Long> {
     
     List<Modalidade> findByContratoId(Long contratoId);
     
+    List<Modalidade> findByDeleted(String deleted);
+    
 }

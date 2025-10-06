@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.gevents.gerenciador_eventos.dto.MenuDTO;
 import com.gevents.gerenciador_eventos.model.Menu;
+import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.repository.MenuRepository;
 
 @Service
@@ -40,7 +41,7 @@ public class MenuService {
     }
     
     public List<Menu> buscarTodos() {
-        return menuRepository.findAll();
+        return menuRepository.findByDeleted("");
     }
 
     public ResponseEntity<?> atualizar(Long id, MenuDTO menuDTO) {
@@ -61,12 +62,15 @@ public class MenuService {
 
         return ResponseEntity.ok(menuAtualizado);
     }
+    
     public ResponseEntity<?> deletar(Long id) {
-        if (!menuRepository.existsById(id)){
+        Menu menu = menuRepository.findById(id).orElse(null);
+        if (menu == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Collections.singletonMap("erro", "Menu não encontrado"));
         }
-        menuRepository.deleteById(id);
-        return ResponseEntity.ok("Menu deletado com sucesso");
+        menu.setDeleted("*"); // Marca como deletado
+        menuRepository.save(menu);
+        return ResponseEntity.ok(java.util.Collections.singletonMap("mensagem", "Menu deletado com sucesso"));
     }
     public ResponseEntity<?> criarMultiplos(List<MenuDTO> menus) {
         if (menus == null || menus.isEmpty()) {
