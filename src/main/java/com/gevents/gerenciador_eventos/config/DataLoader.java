@@ -15,27 +15,25 @@ public class DataLoader {
     @Bean
     CommandLineRunner initStatus(StatusRepository repository) {
         return args -> {
-            if (repository.count() == 0) {
-                List<String> descricoes = List.of(
-                    "Ativo",
-                    "Cancelado",
-                    "Concluído",
-                    "Pendente",
-                    "Em Andamento",
-                    "Aprovado",
-                    "Rejeitado",
-                    "Suspenso",
-                    "Finalizado",
-                    "Em Revisão"
-                );
+            System.out.println("🚀 Iniciando DataLoader...");
 
-                Status status = new Status();
+            List<String> descricoes = List.of(
+                "Ativo", "Cancelado", "Concluído", "Pendente", "Em Andamento",
+                "Aprovado", "Rejeitado", "Suspenso", "Finalizado", "Em Revisão"
+            );
 
-                descricoes.forEach(desc -> {
+            descricoes.forEach(desc -> {
+                // evita duplicação — busca antes de inserir
+                if (repository.findByDescricao(desc).isEmpty()) {
+                    Status status = new Status();
                     status.setDescricao(desc);
                     repository.save(status);
-                });
-            }
+                    System.out.println("✅ Inserido: " + desc);
+                } else {
+                    System.out.println("⚠️ Já existe: " + desc);
+                }
+            });
+
         };
     }
     
