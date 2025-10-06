@@ -45,9 +45,10 @@ public class EventoController {
     public ResponseEntity<?> uploadEventos(
         @RequestPart("contrato") Contrato contrato,
         @RequestPart("modalidade") Modalidade modalidade,
+        @RequestPart("modelo") String modelo,
         @RequestPart("arquivos") List<MultipartFile> arquivos
     ) {
-        return eventoService.uploadEventos(contrato, modalidade, arquivos);
+        return eventoService.uploadEventos(contrato, modalidade, arquivos, modelo);
     }
     @GetMapping("/upload")
     public ResponseEntity<?> uploadEventos(@RequestParam String path) {

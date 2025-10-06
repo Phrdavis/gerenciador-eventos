@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.gevents.gerenciador_eventos.dto.ContratoDTO;
 import com.gevents.gerenciador_eventos.model.Contrato;
 import com.gevents.gerenciador_eventos.model.Modalidade;
-import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.repository.ContratoRepository;
 import com.gevents.gerenciador_eventos.repository.ModalidadeRepository;
 

@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.gevents.gerenciador_eventos.dto.TecnicoDTO;
-import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.model.Tecnico;
 import com.gevents.gerenciador_eventos.repository.TecnicoRepository;
 

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.gevents.gerenciador_eventos.dto.ExecucaoDTO;
 import com.gevents.gerenciador_eventos.model.Execucao;
-import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.model.Tecnico;
 import com.gevents.gerenciador_eventos.repository.EventoRepository;
 import com.gevents.gerenciador_eventos.repository.ExecucaoRepository;

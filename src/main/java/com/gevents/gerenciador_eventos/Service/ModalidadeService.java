@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.gevents.gerenciador_eventos.dto.ModalidadeDTO;
 import com.gevents.gerenciador_eventos.model.Modalidade;
-import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.repository.ContratoRepository;
 import com.gevents.gerenciador_eventos.repository.ModalidadeRepository;
 

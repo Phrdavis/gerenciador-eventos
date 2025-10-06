@@ -139,9 +139,9 @@ public class ExtrairDados {
         evento.setFim(stringToDate(getRegexMatch(conteudo, "(?i)data finalização do evento:\\s*([^\\n]+)", 1)));
         evento.setHoraInicio(stringToTime(getRegexMatch(conteudo, "(?i)horário de início:\\s*([^\\n]+)", 1)));
         evento.setHoraFim(stringToTime(getRegexMatch(conteudo, "(?i)horário de finalização:\\s*([^\\n]+)", 1)));
-        evento.setLocal(captalizingString(getRegexMatch(conteudo, "(?i)local de montagem:\\s*(.*?)\\s*responsável por", 1)));
-        evento.setResponsavel(captalizingString(getRegexMatch(conteudo, "(?i)responsável por\\s*acompanhar montagem:\\s*([A-Za-z\\s\\.]+)\\s+([\\d\\s\\-]+)", 1)));
-        evento.setTelefoneResponsavel(cleanPhone(getRegexMatch(conteudo, "(?i)responsável por\\s*acompanhar montagem:\\s*([A-Za-z\\s\\.]+)\\s+([\\d\\s\\-]+)", 2)));
+        evento.setLocal(captalizingString(getRegexMatch(conteudo, "(?is)local de montagem:\\s*(.*?)\\s*(data de montagem:|responsável por)", 1)));
+        evento.setResponsavel(captalizingString(getRegexMatch(conteudo, "(?is)responsável por\\s*acompanhar montagem:\\s*(.*?)\\s*(\\d{2}\\s*\\d{4,5}\\-?\\d{4})", 1)));
+        evento.setTelefoneResponsavel(cleanPhone(getRegexMatch(conteudo, "(?is)responsável por\\s*acompanhar montagem:\\s*(.*?)\\s*(\\d{2}\\s*\\d{4,5}\\-?\\d{4})", 2)));
 
         return evento;
 

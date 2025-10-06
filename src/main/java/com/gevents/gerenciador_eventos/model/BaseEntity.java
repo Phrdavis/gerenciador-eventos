@@ -15,7 +15,7 @@ import org.hibernate.annotations.SQLDelete;
 public abstract class BaseEntity {
 
     @Column(name = "D_E_L_E_T_", length = 1, nullable = false)
-    private String deleted = " ";
+    private String deleted = "";
 
     public String getDeleted() {
         return deleted;

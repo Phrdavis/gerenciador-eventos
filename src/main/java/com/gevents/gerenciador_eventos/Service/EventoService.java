@@ -16,7 +16,6 @@ import com.gevents.gerenciador_eventos.dto.EventoDTO;
 import com.gevents.gerenciador_eventos.model.Contrato;
 import com.gevents.gerenciador_eventos.model.Evento;
 import com.gevents.gerenciador_eventos.model.Modalidade;
-import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.repository.ContratoRepository;
 import com.gevents.gerenciador_eventos.repository.EventoRepository;
 import com.gevents.gerenciador_eventos.repository.ModalidadeRepository;
@@ -233,7 +232,7 @@ public class EventoService {
         return ResponseEntity.status(HttpStatus.CREATED).body(salvos);
     }
 
-    public ResponseEntity<?> uploadEventos(Contrato contrato, Modalidade modalidade, List<MultipartFile> arquivos) {
+    public ResponseEntity<?> uploadEventos(Contrato contrato, Modalidade modalidade, List<MultipartFile> arquivos, String modelo) {
         
         if (arquivos == null || arquivos.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -270,7 +269,7 @@ public class EventoService {
                 String conteudo = lerConteudoArquivo(destino);
 
                 if (!conteudo.isEmpty()) {
-                    evento = transcreverDadosUsuario(caminhoDestino);
+                    evento = transcreverDadosUsuario(caminhoDestino, modelo);
                 } else {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(java.util.Collections.singletonMap("erro", "Arquivo vazio: " + arquivo.getOriginalFilename()));
@@ -305,20 +304,35 @@ public class EventoService {
         return conteudo.toString();
     }
 
-    private EventoDTO transcreverDadosUsuario(String destino) throws IOException {
+    private EventoDTO transcreverDadosUsuario(String destino, String modelo) throws IOException {
         
         EventoDTO dadosExtraidos = new EventoDTO();
         String textConteudo = "";
 
         textConteudo = ExtrairDados.extrairTextoDePDF(destino).toLowerCase();
 
-        if (textConteudo.contains("fundação educacional")) {
-            dadosExtraidos = ExtrairDados.extrairDadosFundacao(textConteudo);
-        } else if (textConteudo.contains("prefeitura")) {
-            dadosExtraidos = ExtrairDados.extrairDadosPrefeitura(textConteudo);
-        } else {
-            throw new IllegalArgumentException("Modelo não reconhecido");
+        if (!modelo.isEmpty()){
+
+            if (modelo.equals("fundass")) {
+                dadosExtraidos = ExtrairDados.extrairDadosFundacao(textConteudo);
+            } else if (modelo.equals("prefeitura")) {
+                dadosExtraidos = ExtrairDados.extrairDadosPrefeitura(textConteudo);
+            } else {
+                throw new IllegalArgumentException("Modelo não reconhecido");
+            }
+
+        }else{
+
+            if (textConteudo.contains("fundação educacional")) {
+                dadosExtraidos = ExtrairDados.extrairDadosFundacao(textConteudo);
+            } else if (textConteudo.contains("prefeitura")) {
+                dadosExtraidos = ExtrairDados.extrairDadosPrefeitura(textConteudo);
+            } else {
+                throw new IllegalArgumentException("Modelo não reconhecido");
+            }
+
         }
+
 
         dadosExtraidos.setPdf(destino);
         dadosExtraidos.setStatus(statusRepository.findByDescricao("Em Revisão"));

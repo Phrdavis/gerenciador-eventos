@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.gevents.gerenciador_eventos.dto.MenuDTO;
 import com.gevents.gerenciador_eventos.model.Menu;
-import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.repository.MenuRepository;
 
 @Service

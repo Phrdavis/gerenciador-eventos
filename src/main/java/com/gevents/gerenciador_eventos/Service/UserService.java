@@ -9,7 +9,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.gevents.gerenciador_eventos.dto.UserDTO;
-import com.gevents.gerenciador_eventos.model.Status;
 import com.gevents.gerenciador_eventos.model.User;
 import com.gevents.gerenciador_eventos.repository.UserRepository;
 
