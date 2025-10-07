@@ -10,9 +10,11 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.gevents.gerenciador_eventos.dto.EventoDTO;
+import com.gevents.gerenciador_eventos.dto.EventoFilterDTO;
 import com.gevents.gerenciador_eventos.model.Contrato;
 import com.gevents.gerenciador_eventos.model.Evento;
 import com.gevents.gerenciador_eventos.model.Modalidade;
@@ -77,6 +79,7 @@ public class EventoService {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Collections.singletonMap("erro", "Modalidade não encontrada"));
             }
             event.setModalidade(evento.getModalidade());
+            event.setQtdModalidade(evento.getQtdModalidade());
         }
 
         Evento savedUser = eventoRepository.save(event);
@@ -92,8 +95,22 @@ public class EventoService {
         return ResponseEntity.ok(evento);
     }
 
-    public List<Evento> buscarTodos() {
-        return eventoRepository.findByDeleted("");
+    public List<Evento> buscarTodos(EventoFilterDTO eventoDTO) {
+        List<Evento> eventos = eventoRepository.findByDeleted("");
+
+            if(eventoDTO.getInicio() != null){
+                eventos = eventos.stream()
+                        .filter(e -> e.getInicio() != null && !e.getInicio().isBefore(eventoDTO.getInicio()))
+                        .toList();
+            }
+
+            if(eventoDTO.getFim() != null){
+                eventos = eventos.stream()
+                        .filter(e -> e.getFim() != null && !e.getFim().isAfter(eventoDTO.getFim()))
+                        .toList();
+            }
+
+        return eventos;
     }
 
     public ResponseEntity<?> atualizar(Long id, EventoDTO eventoDTO) {
@@ -168,6 +185,13 @@ public class EventoService {
             }
             evento.setModalidade(eventoDTO.getModalidade());
         }
+
+        // if (eventoDTO.getQtdModalidade() != 0) {
+
+            evento.setQtdModalidade(eventoDTO.getQtdModalidade());
+
+        // }
+
         Evento eventoAtualizado = eventoRepository.save(evento);
         return ResponseEntity.ok(eventoAtualizado);
     }
@@ -226,6 +250,7 @@ public class EventoService {
                 }
                 event.setModalidade(dto.getModalidade());
             }
+            event.setQtdModalidade(dto.getQtdModalidade());
             novosEventos.add(event);
         }
         List<Evento> salvos = eventoRepository.saveAll(novosEventos);
@@ -335,6 +360,7 @@ public class EventoService {
 
 
         dadosExtraidos.setPdf(destino);
+        dadosExtraidos.setQtdModalidade(0);
         dadosExtraidos.setStatus(statusRepository.findByDescricao("Em Revisão"));
 
         return dadosExtraidos;

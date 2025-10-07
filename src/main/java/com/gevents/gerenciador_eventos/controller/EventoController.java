@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.gevents.gerenciador_eventos.Service.EventoService;
 import com.gevents.gerenciador_eventos.dto.EventoDTO;
+import com.gevents.gerenciador_eventos.dto.EventoFilterDTO;
 import com.gevents.gerenciador_eventos.model.Contrato;
 import com.gevents.gerenciador_eventos.model.Evento;
 import com.gevents.gerenciador_eventos.model.Modalidade;
@@ -72,8 +73,8 @@ public class EventoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Evento>> buscarTodos() {
-        return ResponseEntity.ok(eventoService.buscarTodos());
+    public ResponseEntity<List<Evento>> buscarTodos(@RequestParam EventoFilterDTO eventoDTO) {
+        return ResponseEntity.ok(eventoService.buscarTodos(eventoDTO));
     }
 
     @PutMapping("/{id}")

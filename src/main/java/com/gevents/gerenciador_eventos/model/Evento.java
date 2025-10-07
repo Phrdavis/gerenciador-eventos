@@ -43,6 +43,8 @@ public class Evento extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "modalidade_id", nullable = true)
     private Modalidade modalidade;
+
+    private int qtdModalidade;
     
     public Long getId(){
         return id;
@@ -163,6 +165,12 @@ public class Evento extends BaseEntity {
 
     public void setModalidade(Modalidade modalidade) {
         this.modalidade = modalidade;
+    }
+    public int getQtdModalidade() {
+        return qtdModalidade;
+    }
+    public void setQtdModalidade(int qtdModalidade) {
+        this.qtdModalidade = qtdModalidade;
     }
 
 }

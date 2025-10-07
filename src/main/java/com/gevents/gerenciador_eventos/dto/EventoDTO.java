@@ -27,6 +27,7 @@ public class EventoDTO {
     private Status status;
     private Contrato contrato;
     private Modalidade modalidade;
+    private int qtdModalidade;
 
     public String getNome(){
         return nome;
@@ -143,4 +144,10 @@ public class EventoDTO {
         this.modalidade = modalidade;
     }
 
+    public int getQtdModalidade() {
+        return qtdModalidade;
+    }
+    public void setQtdModalidade(int qtdModalidade) {
+        this.qtdModalidade = qtdModalidade;
+    }
 }
