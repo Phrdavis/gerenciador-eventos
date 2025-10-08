@@ -24,7 +24,7 @@ public class DataLoader {
 
             descricoes.forEach(desc -> {
                 // evita duplicação — busca antes de inserir
-                if (repository.findByDescricao(desc).isEmpty()) {
+                if (repository.findByDescricao(desc) != null && repository.findByDescricao(desc).isEmpty()) {
                     Status status = new Status();
                     status.setDescricao(desc);
                     repository.save(status);

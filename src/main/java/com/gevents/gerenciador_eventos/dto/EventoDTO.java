@@ -2,6 +2,7 @@ package com.gevents.gerenciador_eventos.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import com.gevents.gerenciador_eventos.model.Contrato;
 import com.gevents.gerenciador_eventos.model.Modalidade;
@@ -16,9 +17,8 @@ public class EventoDTO {
     private String destino;
     private String descricao;
     private String pdf;
-    private LocalDate data;
-    private LocalDate inicio;
-    private LocalDate fim;
+    private LocalDate dataSolicitacao;
+    private List<LocalDate> datas;
     private LocalTime horaInicio;
     private LocalTime horaFim;
     private String local;
@@ -71,23 +71,17 @@ public class EventoDTO {
     public void setPdf(String pdf){
         this.pdf = pdf;
     }
-    public LocalDate  getData(){
-        return data;
+    public LocalDate  getDataSolicitacao(){
+        return dataSolicitacao;
     }
-    public void setData(LocalDate  data){
-        this.data = data;
+    public void setDataSolicitacao(LocalDate  dataSolicitacao){
+        this.dataSolicitacao = dataSolicitacao;
     }
-    public LocalDate  getInicio(){
-        return inicio;
+    public List<LocalDate> getDatas(){
+        return datas;
     }
-    public void setInicio(LocalDate  inicio){
-        this.inicio = inicio;
-    }
-    public LocalDate  getFim(){
-        return fim;
-    }
-    public void setFim(LocalDate  fim){
-        this.fim = fim;
+    public void setDatas(List<LocalDate> datas){
+        this.datas = datas;
     }
     public String getLocal(){
         return local;

@@ -1,19 +1,14 @@
 package com.gevents.gerenciador_eventos.dto;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-
-import com.gevents.gerenciador_eventos.model.Contrato;
-import com.gevents.gerenciador_eventos.model.Modalidade;
-import com.gevents.gerenciador_eventos.model.Status;
+import java.util.List;
 
 public class EventoFilterDTO {
 
-    private LocalDate inicio;
-    private LocalDate fim;
+    private List<LocalDate> datas;
     private int anoAtual;
     private int mesAtual;
-    private int view;
+    private String view;
 
     public int getAnoAtual() {
         return anoAtual;
@@ -27,24 +22,18 @@ public class EventoFilterDTO {
     public void setMesAtual(int mesAtual) {
         this.mesAtual = mesAtual;
     }
-    public int getView() {
+    public String getView() {
         return view;
     }
-    public void setView(int view) {
+    public void setView(String view) {
         this.view = view;
     }
  
-    public LocalDate  getInicio(){
-        return inicio;
+    public List<LocalDate>  getDatas(){
+        return datas;
     }
-    public void setInicio(LocalDate  inicio){
-        this.inicio = inicio;
-    }
-    public LocalDate  getFim(){
-        return fim;
-    }
-    public void setFim(LocalDate  fim){
-        this.fim = fim;
+    public void setDatas(List<LocalDate>  datas){
+        this.datas = datas;
     }
     
 }

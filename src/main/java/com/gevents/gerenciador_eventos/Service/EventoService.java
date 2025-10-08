@@ -51,9 +51,8 @@ public class EventoService {
         event.setDestino(evento.getDestino());
         event.setDescricao(evento.getDescricao());
         event.setPdf(evento.getPdf());
-        event.setData(evento.getData());
-        event.setInicio(evento.getInicio());
-        event.setFim(evento.getFim());
+        event.setDataSolicitacao(evento.getDataSolicitacao());
+        event.setDatas(evento.getDatas());
         event.setHoraInicio(evento.getHoraInicio());
         event.setHoraFim(evento.getHoraFim());
         event.setLocal(evento.getLocal());
@@ -98,17 +97,34 @@ public class EventoService {
     public List<Evento> buscarTodos(EventoFilterDTO eventoDTO) {
         List<Evento> eventos = eventoRepository.findByDeleted("");
 
-            if(eventoDTO.getInicio() != null){
-                eventos = eventos.stream()
-                        .filter(e -> e.getInicio() != null && !e.getInicio().isBefore(eventoDTO.getInicio()))
-                        .toList();
+            if(eventoDTO.getView() != null && eventoDTO.getView().equals("tabela")){
+
+                // if(eventoDTO.getDatasInicio() != null){
+                //     eventos = eventos.stream()
+                //             .filter(e -> e.getDatasInicio() != null && !e.getDatasInicio().isBefore(eventoDTO.getDatasInicio()))
+                //             .toList();
+                // }
+    
+                // if(eventoDTO.getDatasFim() != null){
+                //     eventos = eventos.stream()
+                //             .filter(e -> e.getDatasFim() != null && !e.getDatasFim().isAfter(eventoDTO.getDatasFim()))
+                //             .toList();
+                // }
+
+            }
+            if(eventoDTO.getView() != null && eventoDTO.getView().equals("mes")){
+
+                if(eventoDTO.getMesAtual() != 0 && eventoDTO.getAnoAtual() != 0 && eventoDTO.getMesAtual() >= 1 && eventoDTO.getMesAtual() <= 12){
+
+                    // eventos = eventos.stream()
+                    //         .filter(e -> e.getDatasInicio() != null && (e.getDatasInicio().getMonthValue() == eventoDTO.getMesAtual() || e.getDatasFim().getMonthValue() == eventoDTO.getMesAtual()))
+                    //         .filter(e -> e.getDatasInicio() != null && (e.getDatasInicio().getYear() == eventoDTO.getAnoAtual() || e.getDatasFim().getYear() == eventoDTO.getAnoAtual()))
+                    //         .toList();
+
+                }
+
             }
 
-            if(eventoDTO.getFim() != null){
-                eventos = eventos.stream()
-                        .filter(e -> e.getFim() != null && !e.getFim().isAfter(eventoDTO.getFim()))
-                        .toList();
-            }
 
         return eventos;
     }
@@ -140,14 +156,11 @@ public class EventoService {
         if (eventoDTO.getPdf() != null) {
             evento.setPdf(eventoDTO.getPdf());
         }
-        if (eventoDTO.getData() != null) {
-            evento.setData(eventoDTO.getData());
+        if (eventoDTO.getDatas() != null) {
+            evento.setDatas(eventoDTO.getDatas());
         }
-        if (eventoDTO.getInicio() != null) {
-            evento.setInicio(eventoDTO.getInicio());
-        }
-        if (eventoDTO.getFim() != null) {
-            evento.setFim(eventoDTO.getFim());
+        if (eventoDTO.getDataSolicitacao() != null) {
+            evento.setDataSolicitacao(eventoDTO.getDataSolicitacao());
         }
         if (eventoDTO.getHoraInicio() != null) {
             evento.setHoraInicio(eventoDTO.getHoraInicio());
@@ -221,9 +234,8 @@ public class EventoService {
             event.setDescricao(dto.getDescricao());
             event.setPdf(dto.getPdf());
             event.setNumSolicitacao(dto.getNumSolicitacao());
-            event.setData(dto.getData());
-            event.setInicio(dto.getInicio());
-            event.setFim(dto.getFim());
+            event.setDataSolicitacao(dto.getDataSolicitacao());
+            event.setDatas(dto.getDatas());
             event.setHoraInicio(dto.getHoraInicio());
             event.setHoraFim(dto.getHoraFim());
             event.setLocal(dto.getLocal());

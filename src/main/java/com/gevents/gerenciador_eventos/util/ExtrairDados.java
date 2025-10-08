@@ -1,11 +1,13 @@
 package com.gevents.gerenciador_eventos.util;
 
+import java.util.List;
 import java.util.regex.*;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 
 import com.gevents.gerenciador_eventos.dto.EventoDTO;
+import com.gevents.gerenciador_eventos.util.DateUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,16 +53,16 @@ public class ExtrairDados {
         return ultimaDescricao != null ? ultimaDescricao : "";
     }
 
-    public static LocalDate stringToDate(String input) {
+    // public static LocalDate stringToDate(String input) {
 
-        if (input == null || input.trim().isEmpty()) {
-            return LocalDate.now();
-        }
+    //     if (input == null || input.trim().isEmpty()) {
+    //         return LocalDate.now();
+    //     }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    //     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        return LocalDate.parse(input.trim(), formatter);
-    }
+    //     return LocalDate.parse(input.trim(), formatter);
+    // }
 
     public static LocalTime stringToTime(String timeStr) {
         // Remove espaços extras
@@ -134,9 +136,15 @@ public class ExtrairDados {
         evento.setDestino(captalizingString(getRegexMatch(conteudo, "(?i)destino:\\s*(.+)", 1)));
         evento.setDescricao(captalizingString(getUltimaDescricao(conteudo)));
         evento.setNome(captalizingString(getRegexMatch(conteudo, "(?i)nº solicitação:\\s*\\d+/\\d+\\s*–\\s*(.+)", 1)));
-        evento.setData(stringToDate(getRegexMatch(conteudo, "(?i)data da solicitação:\\s*([^\\n]+)", 1)));
-        evento.setInicio(stringToDate(getRegexMatch(conteudo, "(?i)data início do evento:\\s*([^\\n]+)", 1)));
-        evento.setFim(stringToDate(getRegexMatch(conteudo, "(?i)data finalização do evento:\\s*([^\\n]+)", 1)));
+        evento.setDataSolicitacao(DateUtils.stringToDate(getRegexMatch(conteudo, "(?i)data da solicitação:\\s*([^\\n]+)", 1)));
+        
+        String datasDoEventoString = getRegexMatch(conteudo, "(?i)data início do evento:\\s*([^\\n]+)", 1);
+        String datasFinalEvento = getRegexMatch(conteudo, "(?i)data finalização do evento:\\s*([^\\n]+)", 1);
+
+        List<LocalDate> datasDoEvento = DateUtils.extractDatesFromRangeOrList(datasDoEventoString, datasFinalEvento);
+
+        evento.setDatas(datasDoEvento);
+
         evento.setHoraInicio(stringToTime(getRegexMatch(conteudo, "(?i)horário de início:\\s*([^\\n]+)", 1)));
         evento.setHoraFim(stringToTime(getRegexMatch(conteudo, "(?i)horário de finalização:\\s*([^\\n]+)", 1)));
         evento.setLocal(captalizingString(getRegexMatch(conteudo, "(?is)local de montagem:\\s*(.*?)\\s*(data de montagem:|responsável por)", 1)));
@@ -158,9 +166,15 @@ public class ExtrairDados {
         evento.setDestino(captalizingString(getRegexMatch(conteudo, "(?i)destino:\\s*(.+)", 1)));
         evento.setDescricao(captalizingString(getUltimaDescricao(conteudo)));
         evento.setNome(captalizingString(getRegexMatch(conteudo, "(?i)nº solicitação:\\s*\\d+/\\d+\\s*–\\s*(.+)", 1)));
-        evento.setData(stringToDate(getRegexMatch(conteudo, "(?i)data da solicitação:\\s*([^\\n]+)", 1)));
-        evento.setInicio(stringToDate(getRegexMatch(conteudo, "(?i)datas:\\s*([^\\n]+)", 1)));
-        evento.setFim(stringToDate(getRegexMatch(conteudo, "(?i)datas:\\s*([^\\n]+)", 1)));
+        evento.setDataSolicitacao(DateUtils.stringToDate(getRegexMatch(conteudo, "(?i)data da solicitação:\\s*([^\\n]+)", 1)));
+        
+        String datasDoEventoString = getRegexMatch(conteudo, "(?i)datas:\\s*([^\\n]+)", 1);
+        String datasFinalEvento = getRegexMatch(conteudo, "(?i)datas:\\s*([^\\n]+)", 1);
+
+        List<LocalDate> datasDoEvento = DateUtils.extractDatesFromRangeOrList(datasDoEventoString, datasFinalEvento);
+
+        evento.setDatas(datasDoEvento);
+
         evento.setHoraInicio(stringToTime(getRegexMatch(conteudo, "(?i)horário de início:\\s*([^\\n]+)", 1)));
         evento.setHoraFim(stringToTime(getRegexMatch(conteudo, "(?i)horário de finalização:\\s*([^\\n]+)", 1)));
         evento.setLocal(captalizingString(getRegexMatch(conteudo, "(?i)local de montagem:\\s*(.*?)\\s*(data de montagem:|responsável por)", 1)));

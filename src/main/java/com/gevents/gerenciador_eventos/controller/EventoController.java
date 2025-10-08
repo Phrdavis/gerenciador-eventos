@@ -73,7 +73,7 @@ public class EventoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Evento>> buscarTodos(@RequestParam EventoFilterDTO eventoDTO) {
+    public ResponseEntity<List<Evento>> buscarTodos(EventoFilterDTO eventoDTO) {
         return ResponseEntity.ok(eventoService.buscarTodos(eventoDTO));
     }
 
