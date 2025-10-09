@@ -5,8 +5,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -14,105 +14,127 @@ import java.util.stream.Stream;
 
 public class DateUtils {
 
-    // Lista de formatadores de data comuns que podem ser encontrados nos PDFs
-    private static final List<DateTimeFormatter> DATE_FORMATTERS = Arrays.asList(
+    // Regex para encontrar o padrão de lista de datas: "dd, dd, dd e dd/mm"
+    private static final Pattern DATES_LIST_PATTERN = Pattern.compile("(.+?)\\s*(\\d{1,2}/\\d{4}|\\d{1,2}/\\d{2})$");
+
+    // Formatadores para parsing de data
+    private static final List<DateTimeFormatter> DATE_FORMATTERS = List.of(
         DateTimeFormatter.ofPattern("dd/MM/yyyy"),
         DateTimeFormatter.ofPattern("dd-MM-yyyy"),
         DateTimeFormatter.ofPattern("dd.MM.yyyy"),
         DateTimeFormatter.ofPattern("MM/dd/yyyy"),
         DateTimeFormatter.ofPattern("yyyy-MM-dd"),
-        DateTimeFormatter.ofPattern("d MMMM yyyy"),
-        DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy") // Ex: 10 de outubro de 2025
+        DateTimeFormatter.ofPattern("dd/MM"),
+        DateTimeFormatter.ofPattern("dd-MM")
     );
 
-    public static LocalDate stringToDate(String input) {
-        if (input == null || input.trim().isEmpty()) {
-            return LocalDate.now();
-        }
+    // Formatador para datas com nomes de meses em português
+    private static final DateTimeFormatter TEXT_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd 'de' MMMM 'de' yyyy", new Locale("pt", "BR"));
 
-        String cleanedInput = input.trim();
-
-        for (DateTimeFormatter formatter : DATE_FORMATTERS) {
-            try {
-                // Tenta analisar a string com cada um dos formatadores
-                return LocalDate.parse(cleanedInput, formatter);
-            } catch (DateTimeParseException e) {
-                // Se a análise falhar, tenta o próximo formatador
-                continue;
-            }
-        }
-
-        // Se nenhum formatador funcionou, você pode lançar uma exceção ou retornar null/uma data padrão
-        System.err.println("Não foi possível analisar a data: " + input);
-        return null; // ou throw new IllegalArgumentException("Formato de data inválido: " + input);
-    }
-
-    public static List<LocalDate> stringToDates(String input) {
-        if (input == null || input.trim().isEmpty()) {
+    /**
+     * Função principal para analisar datas a partir de strings extraídas de documentos.
+     * Ela lida com datas saltadas, intervalos de datas e datas únicas.
+     * * @param dateStr A string de data de início (pode conter uma lista de datas).
+     * @param endDateStr A string de data de finalização (opcional).
+     * @return Uma lista de LocalDate.
+     */
+    public static List<LocalDate> parseDates(String dateStr, String endDateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) {
             return new ArrayList<>();
         }
 
-        List<LocalDate> dates = new ArrayList<>();
-        
-        // Padrão para encontrar os dias e a parte final com mês e ano
-        Pattern pattern = Pattern.compile("(.+?)\\s*e\\s*([^\\s]+)$");
-        Matcher matcher = pattern.matcher(input);
-        
-        String dayPart = input;
-        String monthAndYear = "";
-        
-        if (matcher.find()) {
-            // Se encontrar o padrão, separa os dias e a parte final
-            dayPart = matcher.group(1).replace("e", "").trim();
-            monthAndYear = "/" + matcher.group(2).trim();
-        }
+        String cleanedInput = dateStr.trim();
 
-        // Divide a string de dias usando ',' como delimitador
-        String[] days = dayPart.split(",\\s*");
+        // 1. Tentar parsear como uma lista de datas saltadas
+        if (cleanedInput.contains(",")) {
+            List<LocalDate> parsedDates = parseDateList(cleanedInput);
+            if (!parsedDates.isEmpty()) {
+                return parsedDates;
+            }
+        }
         
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        
-        for (String day : days) {
-            String fullDateString = day.trim() + monthAndYear;
-            try {
-                // Tenta analisar cada data e adiciona na lista
-                dates.add(LocalDate.parse(fullDateString, formatter));
-            } catch (Exception e) {
-                // Tratar erro de parse, se necessário
-                System.err.println("Erro ao analisar a data: " + fullDateString);
+        // 2. Tentar parsear como um intervalo de datas
+        if (endDateStr != null && !endDateStr.trim().isEmpty()) {
+            LocalDate startDate = parseSingleDate(cleanedInput);
+            LocalDate endDate = parseSingleDate(endDateStr.trim());
+            if (startDate != null && endDate != null) {
+                return createDateRange(startDate, endDate);
             }
         }
 
-        return dates;
-    }
-    public static List<LocalDate> extractDatesFromRangeOrList(String startDateStr, String endDateStr) {
-        // Se a data de início for uma lista de datas, use a lógica de datas saltadas
-        if (startDateStr.contains(",")) {
-            return stringToDates(startDateStr);
+        // 3. Tentar parsear como um formato de texto (ex: "10 de outubro de 2025")
+        try {
+            LocalDate textDate = LocalDate.parse(cleanedInput, TEXT_DATE_FORMATTER);
+            return List.of(textDate);
+        } catch (DateTimeParseException e) {
+            // Se falhar, tenta o próximo padrão
         }
-
-        // Se a data de início e fim estiverem preenchidas, considere um intervalo
-        if (startDateStr != null && !startDateStr.trim().isEmpty() &&
-            endDateStr != null && !endDateStr.trim().isEmpty()) {
-
-            LocalDate startDate = stringToDate(startDateStr);
-            LocalDate endDate = stringToDate(endDateStr);
-
-            // Se as datas são válidas, gere a lista de datas do intervalo
-            if (startDate != null && endDate != null && !startDate.isAfter(endDate)) {
-                long numOfDaysBetween = ChronoUnit.DAYS.between(startDate, endDate) + 1;
-                return Stream.iterate(startDate, date -> date.plusDays(1))
-                             .limit(numOfDaysBetween)
-                             .collect(Collectors.toList());
-            }
-        }
-
-        // Se nenhuma das condições acima for atendida, retorne uma lista vazia ou com uma única data
-        LocalDate singleDate = stringToDate(startDateStr);
+        
+        // 4. Tentar parsear como uma única data em formatos comuns (ex: "10/10/2025", "10/10")
+        LocalDate singleDate = parseSingleDate(cleanedInput);
         if (singleDate != null) {
             return List.of(singleDate);
         }
 
+        System.err.println("Nenhum padrão de data reconhecido para: " + dateStr);
         return new ArrayList<>();
+    }
+
+    // --- Funções Auxiliares ---
+    
+    // Função para analisar uma única data em múltiplos formatos
+    public static LocalDate parseSingleDate(String dateStr) {
+        String processedDateStr = dateStr;
+        if (dateStr.matches("\\d{1,2}[/-]\\d{1,2}")) {
+            processedDateStr = String.format("%s/%d", dateStr, LocalDate.now().getYear());
+        }
+        for (DateTimeFormatter formatter : DATE_FORMATTERS) {
+            try {
+                return LocalDate.parse(processedDateStr, formatter);
+            } catch (DateTimeParseException e) {
+                // Tentar o próximo
+            }
+        }
+        return null;
+    }
+
+    // Função para analisar strings com listas de datas
+    private static List<LocalDate> parseDateList(String input) {
+        List<LocalDate> dates = new ArrayList<>();
+        Matcher matcher = DATES_LIST_PATTERN.matcher(input.replace("e", ""));
+        
+        if (matcher.find()) {
+            try {
+                String dayPart = matcher.group(1).trim();
+                String monthAndYear = matcher.group(2).trim();
+                
+                String[] days = dayPart.split("[,\\s]+");
+                
+                for (String day : days) {
+                    if (!day.trim().isEmpty()) {
+                        String fullDateStr = String.format("%s/%s", day.trim(), monthAndYear);
+                        LocalDate date = parseSingleDate(fullDateStr);
+                        if (date != null) {
+                            dates.add(date);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Erro ao analisar a lista de datas: " + input);
+                return new ArrayList<>();
+            }
+        }
+        return dates;
+    }
+
+    // Função para gerar um intervalo de datas (Útil para o seu caso de datas de início e fim)
+    public static List<LocalDate> createDateRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null || startDate.isAfter(endDate)) {
+            return new ArrayList<>();
+        }
+        long numOfDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        return Stream.iterate(startDate, date -> date.plusDays(1))
+                     .limit(numOfDays)
+                     .collect(Collectors.toList());
     }
 }

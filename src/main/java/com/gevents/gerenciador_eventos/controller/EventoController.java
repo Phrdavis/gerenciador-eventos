@@ -3,9 +3,11 @@ package com.gevents.gerenciador_eventos.controller;
 import java.io.File;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,6 +28,8 @@ import com.gevents.gerenciador_eventos.dto.EventoFilterDTO;
 import com.gevents.gerenciador_eventos.model.Contrato;
 import com.gevents.gerenciador_eventos.model.Evento;
 import com.gevents.gerenciador_eventos.model.Modalidade;
+import com.gevents.gerenciador_eventos.util.ExtrairDados;
+import com.gevents.gerenciador_eventos.util.RespostaAPI;
 
 @RestController
 @RequestMapping("/api/eventos")
@@ -49,7 +53,15 @@ public class EventoController {
         @RequestPart("modelo") String modelo,
         @RequestPart("arquivos") List<MultipartFile> arquivos
     ) {
-        return eventoService.uploadEventos(contrato, modalidade, arquivos, modelo);
+        RespostaAPI resposta = eventoService.uploadEventos(contrato, modalidade, arquivos, modelo);
+        boolean hasErrors = !resposta.getErros().isEmpty();
+
+        if (hasErrors) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+        } else {
+            return ResponseEntity.ok(resposta);
+        }
+        
     }
     @GetMapping("/upload")
     public ResponseEntity<?> uploadEventos(@RequestParam String path) {

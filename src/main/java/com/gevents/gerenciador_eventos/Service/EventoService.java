@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.gevents.gerenciador_eventos.dto.EventoDTO;
 import com.gevents.gerenciador_eventos.dto.EventoFilterDTO;
+import com.gevents.gerenciador_eventos.enums.StatusErro;
+import com.gevents.gerenciador_eventos.mapper.EventoMapper;
 import com.gevents.gerenciador_eventos.model.Contrato;
 import com.gevents.gerenciador_eventos.model.Evento;
 import com.gevents.gerenciador_eventos.model.Modalidade;
@@ -22,7 +25,9 @@ import com.gevents.gerenciador_eventos.repository.ContratoRepository;
 import com.gevents.gerenciador_eventos.repository.EventoRepository;
 import com.gevents.gerenciador_eventos.repository.ModalidadeRepository;
 import com.gevents.gerenciador_eventos.repository.StatusRepository;
+import com.gevents.gerenciador_eventos.util.ErroExtracao;
 import com.gevents.gerenciador_eventos.util.ExtrairDados;
+import com.gevents.gerenciador_eventos.util.RespostaAPI;
 
 @Service
 public class EventoService {
@@ -31,12 +36,14 @@ public class EventoService {
     private StatusRepository statusRepository;
     private ContratoRepository contratoRepository;
     private ModalidadeRepository modalidadeRepository;
+    private final ExtrairDados extratorDeDados;
 
     public EventoService(EventoRepository eventoRepository, StatusRepository statusRepository, ContratoRepository contratoRepository, ModalidadeRepository modalidadeRepository){
         this.eventoRepository = eventoRepository;
         this.statusRepository = statusRepository;
         this.contratoRepository = contratoRepository;
         this.modalidadeRepository = modalidadeRepository;
+        this.extratorDeDados = new ExtrairDados();
     }
     
 
@@ -116,10 +123,9 @@ public class EventoService {
 
                 if(eventoDTO.getMesAtual() != 0 && eventoDTO.getAnoAtual() != 0 && eventoDTO.getMesAtual() >= 1 && eventoDTO.getMesAtual() <= 12){
 
-                    // eventos = eventos.stream()
-                    //         .filter(e -> e.getDatasInicio() != null && (e.getDatasInicio().getMonthValue() == eventoDTO.getMesAtual() || e.getDatasFim().getMonthValue() == eventoDTO.getMesAtual()))
-                    //         .filter(e -> e.getDatasInicio() != null && (e.getDatasInicio().getYear() == eventoDTO.getAnoAtual() || e.getDatasFim().getYear() == eventoDTO.getAnoAtual()))
-                    //         .toList();
+                    eventos = eventos.stream()
+                            .filter(e -> e.getDatas() != null && e.getDatas().stream().anyMatch(d -> d.getMonthValue() == eventoDTO.getMesAtual() && d.getYear() == eventoDTO.getAnoAtual()))
+                            .toList();
 
                 }
 
@@ -269,21 +275,24 @@ public class EventoService {
         return ResponseEntity.status(HttpStatus.CREATED).body(salvos);
     }
 
-    public ResponseEntity<?> uploadEventos(Contrato contrato, Modalidade modalidade, List<MultipartFile> arquivos, String modelo) {
+    public RespostaAPI uploadEventos(Contrato contrato, Modalidade modalidade, List<MultipartFile> arquivos, String modelo) {
         
+        List<Evento> eventosSalvos = new ArrayList<>();
+        List<ErroExtracao> erros = new ArrayList<>();
+
         if (arquivos == null || arquivos.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(java.util.Collections.singletonMap("erro", "Por favor, envie um arquivo."));
+            erros.add(new ErroExtracao("UPLOAD_VAZIO", "Por favor, envie um arquivo.", "geral", StatusErro.ERROR));
+            return new RespostaAPI(new ArrayList<>(), erros);
         }
 
         if (contrato == null || contratoRepository.findById(contrato.getId()).isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(java.util.Collections.singletonMap("erro", "Por favor, envie um contrato."));
+            erros.add(new ErroExtracao("CONTRATO_INVALIDO", "Por favor, envie um contrato válido.", "geral", StatusErro.ERROR));
+            return new RespostaAPI(new ArrayList<>(), erros);
         }
 
         if (modalidade == null || modalidadeRepository.findById(modalidade.getId()).isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(java.util.Collections.singletonMap("erro", "Por favor, envie uma modalidade."));
+            erros.add(new ErroExtracao("MODALIDADE_INVALIDA", "Por favor, envie uma modalidade válida.", "geral", StatusErro.ERROR));
+            return new RespostaAPI(new ArrayList<>(), erros);
         }
 
         String pastaDestino = Paths.get("uploads").toAbsolutePath().toString();
@@ -293,90 +302,126 @@ public class EventoService {
             diretorio.mkdirs();
         }
 
+        erros = extratorDeDados.getErros();
+        erros.clear(); 
+
         for (MultipartFile arquivo : arquivos) {
-            EventoDTO evento = new EventoDTO();
+            String nomeArquivo = arquivo.getOriginalFilename();
+            boolean isValid = false;
             try {
-                // Definir o caminho onde cada arquivo será salvo
+                
                 String caminhoDestino = pastaDestino + File.separator + arquivo.getOriginalFilename();
                 File destino = new File(caminhoDestino);
-
-                // Salvar o arquivo
                 arquivo.transferTo(destino);
 
-                String conteudo = lerConteudoArquivo(destino);
+                // String conteudo = lerConteudoArquivo(destino);
+                String conteudo = extratorDeDados.extrairTextoDePDF(caminhoDestino, nomeArquivo);
 
-                if (!conteudo.isEmpty()) {
-                    evento = transcreverDadosUsuario(caminhoDestino, modelo);
-                } else {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(java.util.Collections.singletonMap("erro", "Arquivo vazio: " + arquivo.getOriginalFilename()));
+                if (conteudo == null) {
+                    continue; // Se a extração falhou, o erro já foi registrado. Vá para o próximo arquivo.
                 }
 
-                evento.setContrato(contrato);
-                evento.setModalidade(modalidade);
+                EventoDTO eventoDTO = new EventoDTO();
+                
+                if ("fundass".equals(modelo)) {
+                    eventoDTO = extratorDeDados.extrairDadosFundacao(conteudo, nomeArquivo);
+                } else if ("prefeitura".equals(modelo)) {
+                    eventoDTO = extratorDeDados.extrairDadosPrefeitura(conteudo, nomeArquivo);
+                }
+                
+                if (eventoDTO.getNumSolicitacao() != null && !eventoDTO.getNumSolicitacao().isEmpty()) {
+                    isValid = true;
+                } else {
+                    isValid = false;
+                    erros.add(new ErroExtracao("FALHA_EXTRAÇÃO_CRITICA", "Número de solicitação não foi extraído, evento não será salvo.", nomeArquivo, StatusErro.ERROR));
+                }
+                
+                if (eventoDTO.getNome() != null && !eventoDTO.getNome().isEmpty()) {
+                    isValid = true;
+                } else {
+                    isValid = false;
+                    erros.add(new ErroExtracao("FALHA_EXTRAÇÃO_CRITICA", "Nome não foi extraído, evento não será salvo.", nomeArquivo, StatusErro.ERROR));
+                }
+                
+                if (eventoDTO.getDatas() != null && !eventoDTO.getDatas().isEmpty()) {
+                    isValid = true;
+                } else {
+                    isValid = false;
+                    erros.add(new ErroExtracao("FALHA_EXTRAÇÃO_CRITICA", "Datas não foram extraídas, evento não será salvo.", nomeArquivo, StatusErro.ERROR));
+                }
 
-                criar(evento);
+                if(isValid){
+                    Evento evento = EventoMapper.toEntity(eventoDTO);
+                    evento.setContrato(contrato);
+                    evento.setModalidade(modalidade);
+
+                    evento.setPdf(caminhoDestino);
+                    evento.setQtdModalidade(0);
+                    evento.setStatus(statusRepository.findByDescricao("Em Revisão"));
+
+                    eventosSalvos.add(eventoRepository.save(evento));
+                }
 
             } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(java.util.Collections.singletonMap("erro", "Erro ao salvar o arquivo " + arquivo.getOriginalFilename() + ": " + e.getMessage()));
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(java.util.Collections.singletonMap("erro", e.getMessage() + ": " + arquivo.getOriginalFilename()));
+                erros.add(new ErroExtracao("ERRO_IO", "Erro ao salvar o arquivo: " + e.getMessage(), nomeArquivo, StatusErro.ERROR));
+            } finally {
+                // Remover o arquivo temporário
+                File arquivoTemp = new File(pastaDestino + File.separator + nomeArquivo);
+                if (arquivoTemp.exists()) {
+                    arquivoTemp.delete();
+                }
             }
         }
 
-        return ResponseEntity.ok().body(java.util.Collections.singletonMap("message", "Eventos criados!"));
+        List<EventoDTO> eventosDTOs = EventoMapper.toDtoList(eventosSalvos);
+
+        return new RespostaAPI(eventosDTOs, erros);
 
     }
 
-    private String lerConteudoArquivo(File arquivo) throws IOException {
-        StringBuilder conteudo = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(arquivo))) {
-            String linha;
-            while ((linha = reader.readLine()) != null) {
-                conteudo.append(linha).append("\n");
-            }
-        }
-        return conteudo.toString();
-    }
+    // private String lerConteudoArquivo(File arquivo) throws IOException {
+    //     StringBuilder conteudo = new StringBuilder();
+    //     try (BufferedReader reader = new BufferedReader(new FileReader(arquivo))) {
+    //         String linha;
+    //         while ((linha = reader.readLine()) != null) {
+    //             conteudo.append(linha).append("\n");
+    //         }
+    //     }
+    //     return conteudo.toString();
+    // }
 
-    private EventoDTO transcreverDadosUsuario(String destino, String modelo) throws IOException {
+    // private EventoDTO transcreverDadosUsuario(String destino, String modelo, String nomeArquivo) throws IOException {
         
-        EventoDTO dadosExtraidos = new EventoDTO();
-        String textConteudo = "";
+    //     EventoDTO dadosExtraidos = new EventoDTO();
+    //     String textConteudo = "";
 
-        textConteudo = ExtrairDados.extrairTextoDePDF(destino).toLowerCase();
+    //     textConteudo = ExtrairDados.extrairTextoDePDF(destino, nomeArquivo).toLowerCase();
 
-        if (!modelo.isEmpty()){
+    //     if (!modelo.isEmpty()){
 
-            if (modelo.equals("fundass")) {
-                dadosExtraidos = ExtrairDados.extrairDadosFundacao(textConteudo);
-            } else if (modelo.equals("prefeitura")) {
-                dadosExtraidos = ExtrairDados.extrairDadosPrefeitura(textConteudo);
-            } else {
-                throw new IllegalArgumentException("Modelo não reconhecido");
-            }
+    //         if (modelo.equals("fundass")) {
+    //             dadosExtraidos = ExtrairDados.extrairDadosFundacao(textConteudo, nomeArquivo);
+    //         } else if (modelo.equals("prefeitura")) {
+    //             dadosExtraidos = ExtrairDados.extrairDadosPrefeitura(textConteudo, nomeArquivo);
+    //         } else {
+    //             throw new IllegalArgumentException("Modelo não reconhecido");
+    //         }
 
-        }else{
+    //     }else{
 
-            if (textConteudo.contains("fundação educacional")) {
-                dadosExtraidos = ExtrairDados.extrairDadosFundacao(textConteudo);
-            } else if (textConteudo.contains("prefeitura")) {
-                dadosExtraidos = ExtrairDados.extrairDadosPrefeitura(textConteudo);
-            } else {
-                throw new IllegalArgumentException("Modelo não reconhecido");
-            }
+    //         if (textConteudo.contains("fundação educacional")) {
+    //             dadosExtraidos = ExtrairDados.extrairDadosFundacao(textConteudo, nomeArquivo);
+    //         } else if (textConteudo.contains("prefeitura")) {
+    //             dadosExtraidos = ExtrairDados.extrairDadosPrefeitura(textConteudo, nomeArquivo);
+    //         } else {
+    //             throw new IllegalArgumentException("Modelo não reconhecido");
+    //         }
 
-        }
+    //     }
 
 
-        dadosExtraidos.setPdf(destino);
-        dadosExtraidos.setQtdModalidade(0);
-        dadosExtraidos.setStatus(statusRepository.findByDescricao("Em Revisão"));
-
-        return dadosExtraidos;
-    }
+    //     return dadosExtraidos;
+    // }
 
 
     
