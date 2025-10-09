@@ -5,11 +5,11 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: gevents_db
-      MYSQL_USER: gevents
-      MYSQL_PASSWORD: gevents123
-      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     ports:
-      - "3306:3306"
+      - ${DB_PORT}:3306
     volumes:
       - ./mysql_data:/var/lib/mysql
       - ./mysql_data/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -25,9 +25,10 @@ services:
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: mysql
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/gevents_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&connectTimeout=60000
-      SPRING_DATASOURCE_USERNAME: gevents
-      SPRING_DATASOURCE_PASSWORD: gevents123
+      SPRING_DATASOURCE_URL: jdbc:mysql://${DB_HOST}:${DB_PORT}/gevents_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&connectTimeout=60000
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET} 
     ports:
       - "8081:8081"
     depends_on:
