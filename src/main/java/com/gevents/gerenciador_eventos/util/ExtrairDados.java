@@ -53,17 +53,6 @@ public class ExtrairDados {
         return ultimaDescricao != null ? ultimaDescricao : "";
     }
 
-    // public static LocalDate stringToDate(String input) {
-
-    //     if (input == null || input.trim().isEmpty()) {
-    //         return LocalDate.now();
-    //     }
-
-    //     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-    //     return LocalDate.parse(input.trim(), formatter);
-    // }
-
     public static LocalTime stringToTime(String timeStr) {
         // Remove espaços extras
         timeStr = timeStr.trim();

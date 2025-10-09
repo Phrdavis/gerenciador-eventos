@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -21,6 +22,8 @@ public class Evento extends BaseEntity {
     private String modelo;
     private String upload;
     private String destino;
+
+    @Column(length = 1000)
     private String descricao;
     private String numSolicitacao;
     private String pdf;
