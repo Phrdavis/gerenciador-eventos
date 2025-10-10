@@ -366,10 +366,10 @@ public class EventoService {
                 erros.add(new ErroExtracao("ERRO_IO", "Erro ao salvar o arquivo: " + e.getMessage(), nomeArquivo, StatusErro.ERROR));
             } finally {
                 // Remover o arquivo temporário
-                File arquivoTemp = new File(pastaDestino + File.separator + nomeArquivo);
-                if (arquivoTemp.exists()) {
-                    arquivoTemp.delete();
-                }
+                // File arquivoTemp = new File(pastaDestino + File.separator + nomeArquivo);
+                // if (arquivoTemp.exists()) {
+                //     arquivoTemp.delete();
+                // }
             }
         }
 

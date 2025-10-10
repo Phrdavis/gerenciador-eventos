@@ -101,8 +101,16 @@ public class ExtrairDados {
             "FUDASS_DATA_FIM_AUSENTE", "Data Fim não encontrada.", nomeArquivo, StatusErro.WARN);
 
         if (dataInicioStr != null) {
-            List<LocalDate> datasDoEvento = DateUtils.parseDates(dataInicioStr, dataFimStr);
-            evento.setDatas(datasDoEvento);
+            List<LocalDate> datasDoEvento = DateUtils.parseDates(dataInicioStr);
+            if(!datasDoEvento.isEmpty()){
+                evento.setDatas(datasDoEvento);
+            }
+        }
+        if (dataFimStr != null) {
+            List<LocalDate> datasDoEvento = DateUtils.parseDates(dataFimStr);
+            if(!datasDoEvento.isEmpty()){
+                evento.getDatas().addAll(datasDoEvento);
+            }
         }
 
         String horaInicioStr = extrairComTratamento(() -> captalizingString(getRegexMatch(conteudo, "(?i)horário de início:\\s*([^\\n]+)", 1)),
@@ -115,8 +123,10 @@ public class ExtrairDados {
         String horaFimStr = extrairComTratamento(() -> captalizingString(getRegexMatch(conteudo, "(?i)horário de finalização:\\s*([^\\n]+)", 1)),
             "FUDASS_HORA_FIM_AUSENTE", "Hora de Fim não encontrada.", nomeArquivo, StatusErro.WARN);
 
-        if (horaFimStr != null) {
+        if (horaFimStr != null && !horaFimStr.equals("-")) {
             evento.setHoraFim(TimeUtils.stringToTime(horaFimStr));
+        }else{
+            evento.setHoraFim(TimeUtils.stringToTime(horaInicioStr));
         }
 
         String local = extrairComTratamento(() -> captalizingString(getRegexMatch(conteudo, "(?is)local de montagem:\\s*(.*?)\\s*(data de montagem:|responsável por)", 1)),
@@ -226,10 +236,13 @@ public class ExtrairDados {
             "FUDASS_DATA_FIM_AUSENTE", "Data Fim não encontrada.", nomeArquivo, StatusErro.WARN);
 
         if (dataInicioStr != null) {
-            List<LocalDate> datasDoEvento = DateUtils.parseDates(dataInicioStr, dataFimStr);
+            List<LocalDate> datasDoEvento = DateUtils.parseDates(dataInicioStr);
             evento.setDatas(datasDoEvento);
         }
-
+        if (dataFimStr != null) {
+            List<LocalDate> datasDoEvento = DateUtils.parseDates(dataFimStr);
+            evento.getDatas().addAll(datasDoEvento);
+        }
         String horaInicioStr = extrairComTratamento(() -> captalizingString(getRegexMatch(conteudo, "(?i)horário de início:\\s*([^\\n]+)", 1)),
             "FUDASS_HORA_INICIO_AUSENTE", "Hora de Início não encontrada.", nomeArquivo, StatusErro.WARN);
 
